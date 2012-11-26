@@ -12,6 +12,11 @@
 bin/
 gen/
 
+# mac
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+
 # Local configuration file (sdk path, etc)
 local.properties
 
