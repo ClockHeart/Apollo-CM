@@ -184,6 +184,7 @@ public final class MusicUtils {
             formatter.format(quantity, Integer.valueOf(number));
             builder.append(formatBuilder);
             final String label = builder.toString();
+            formatter.close();
             return label != null ? label : null;
         } catch (final IndexOutOfBoundsException fixme) {
             return null;
@@ -210,6 +211,7 @@ public final class MusicUtils {
         mTimeArgs[3] = secs;
         mTimeArgs[4] = secs % 60;
         final String mTime = formatter.format(durationFormat, mTimeArgs).toString();
+        formatter.close();
         return mTime;
     }
 
