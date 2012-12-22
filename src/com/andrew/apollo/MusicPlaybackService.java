@@ -1221,6 +1221,25 @@ public class MusicPlaybackService extends Service {
         // Update the lockscreen controls
         updateRemoteControlClient(what);
 
+		// Manage Last.fm Scrobbling
+		if (what.equals(META_CHANGED)
+			|| (what.equals(PLAYSTATE_CHANGED) && mIsSupposedToBePlaying)) {
+			// Called on META_CHANGED or when we resume music (unpause)
+			Intent bCast = new Intent("fm.last.android.metachanged");
+			bCast.putExtra("app-name", "Apollo");
+			bCast.putExtra("app-package", "com.andrew.apollo");
+			bCast.putExtra("artist", getArtistName());
+			bCast.putExtra("album", getAlbumName());
+			bCast.putExtra("track", getTrackName());
+			bCast.putExtra("duration", duration());
+			bCast.putExtra("position", position());
+			sendBroadcast(bCast);
+		}else if(what.equals(PLAYSTATE_CHANGED) && ! mIsSupposedToBePlaying){
+			// Song paused
+			Intent b = new Intent("fm.last.android.playbackpaused");
+			sendBroadcast(b);
+		}
+        
         if (what.equals(META_CHANGED)) {
             // Increase the play count for favorite songs.
             if (mFavoritesCache.getSongId(getAudioId()) != null) {
@@ -2185,7 +2204,7 @@ public class MusicPlaybackService extends Service {
                     notifyChange(PLAYSTATE_CHANGED);
                     notifyChange(META_CHANGED);
                 } else {
-                    // Remove then unregister the conrols
+                    // Remove then unregister the controls
                     mRemoteControlClientCompat
                             .setPlaybackState(RemoteControlClient.PLAYSTATE_STOPPED);
                     RemoteControlHelper.unregisterRemoteControlClient(mAudioManager,
@@ -2633,6 +2652,10 @@ public class MusicPlaybackService extends Service {
                 mService.get().mWakeLock.acquire(30000);
                 mHandler.sendEmptyMessage(TRACK_ENDED);
                 mHandler.sendEmptyMessage(RELEASE_WAKELOCK);
+                
+                // Last.fm scrobbing : Playback complete
+                Intent i = new Intent("fm.last.android.playbackcomplete");
+                mService.get().sendBroadcast(i);
             }
         }
     }
